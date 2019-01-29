@@ -13,8 +13,16 @@
 				background-color: black;
 			}
 
-			#top_arrow{
+			#top_arrow_img{
 				transform: rotate(90deg);
+			}
+
+			#right_arrow_img{
+				transform: rotate(180deg);
+			}
+
+			#bottom_arrow_img{
+				transform: rotate(270deg);
 			}
 
 		</style>
@@ -27,21 +35,33 @@
 
 			<div id="start">
 				<div id="front">
+					<div id="your_score_display">
+						<pre id="your_score_text">Your Score</pre>
+						<pre id="your_score_score">0</pre>
+					</div>
 				</div>
 				<div id="middle">
 					<canvas id="playing_area" width=600 height=500></canvas>
 				</div>
 				<div id="last">
-					<div id="your_score_display">
-						
-					</div>
 					<div id="high_score_display">
-						
+						<pre id="high_score_text">High Score</pre>
+						<pre id="high_score_score">0</pre>
 					</div>
+					<div id="blank_area"></div>
 					<div id="controls">
-						<pre id="controls_text">GAME CONTROLS</pre>
+						<pre id="controls_text">Game Controls</pre>
 						<div id="top_arrow">
 							<button id="top_arrow_btn"><img src="arrow.jpg" id="top_arrow_img"></button>
+						</div>
+						<div id="left_arrow">
+							<button id="left_arrow_btn"><img src="arrow.jpg" id="left_arrow_img"></button>
+						</div>
+						<div id="right_arrow">
+							<button id="right_arrow_btn"><img src="arrow.jpg" id="right_arrow_img"></button>
+						</div>
+						<div id="bottom_arrow">
+							<button id="bottom_arrow_btn"><img src="arrow.jpg" id="bottom_arrow_img"></button>
 						</div>
 					</div>
 				</div>
