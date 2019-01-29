@@ -13,6 +13,10 @@
 				background-color: black;
 			}
 
+			#top_arrow{
+				transform: rotate(90deg);
+			}
+
 		</style>
 
 	</head>
@@ -23,13 +27,24 @@
 
 			<div id="start">
 				<div id="front">
-					<div id="your_score_text"></div>
-					<div id="your_score_score"></div>
 				</div>
 				<div id="middle">
 					<canvas id="playing_area" width=600 height=500></canvas>
 				</div>
-				<div id="last"></div>
+				<div id="last">
+					<div id="your_score_display">
+						
+					</div>
+					<div id="high_score_display">
+						
+					</div>
+					<div id="controls">
+						<pre id="controls_text">GAME CONTROLS</pre>
+						<div id="top_arrow">
+							<button id="top_arrow_btn"><img src="arrow.jpg" id="top_arrow_img"></button>
+						</div>
+					</div>
+				</div>
 			</div>
 
 			<script src="snake_and_ball_game.js"></script>
