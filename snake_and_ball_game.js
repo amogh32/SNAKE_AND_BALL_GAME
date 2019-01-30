@@ -23,7 +23,8 @@ var right_arrow_margin_top=left_arrow_margin_top;
 var bottom_arrow_margin_left=top_arrow_margin_left;
 var bottom_arrow_margin_top=2*between_arrow_margin+arrow_height;
 var border=20;
-var start_game_margin_left=front_width+canvas_width/4;
+var start_game_margin_left=front_width+canvas_width/8;
+var pause_left_margin=canvas_width/8;
 var snake_width=15;
 var snake_height=15;
 var playing_area_width=canvas_width-2*border;
@@ -36,6 +37,7 @@ var direction;
 var new_direction;
 var ball_x;
 var ball_y;
+var pause=0;
 ctx.fillStyle="#8B4513";
 ctx.fillRect(0,0,canvas_width,border);
 ctx.fillRect(0,border,border,canvas_height);
@@ -79,6 +81,7 @@ right_arrow_margin_left+="px";
 bottom_arrow_margin_top+="px";
 bottom_arrow_margin_left+="px";
 start_game_margin_left+="px";
+pause_left_margin+="px";
 $("#start").css({ "width" : width , "height" : canvas_height });
 $("#front").css({ "width" : front_width , "height" : canvas_height , "float" : "left" });
 $("#middle").css({ "width" : canvas_width , "height" : canvas_height , "float" : "left"});
@@ -105,17 +108,30 @@ $("#high_score_text").css({ "margin-top" : "0px" ,"margin-bottom" : "0px" , "tex
 $("#high_score_score").css({ "margin-top" : "15px" ,"text-align" : "center" , "font-size" : "40px" , "color" : "white" });
 $("#blank_area").css({ "width" : front_width , "height" : your_score_height });
 $("#start_game").css({ "margin-top" : "20px", "margin-left" : start_game_margin_left });
+$("#pause").css({  "margin-left" : pause_left_margin });
 $(document).ready(function()
 {
 	draw_snake_block();
 	$("#top_arrow_btn,#bottom_arrow_btn,#left_arrow_btn,#right_arrow_btn").attr("disabled" , true);
+	$("#pause").attr("disabled" , true);
 	direction="right";
 });
 
 $("#start_game").click(function()
 {
 	$("#top_arrow_btn,#bottom_arrow_btn,#left_arrow_btn,#right_arrow_btn").attr("disabled" , false);
+	$("#pause").attr("disabled" , false);
 	$("#start_game").attr("disabled" , true);
+	pause=0;
+	draw_snake();
+});
+
+$("#pause").click(function()
+{
+	$("#top_arrow_btn,#bottom_arrow_btn,#left_arrow_btn,#right_arrow_btn").attr("disabled" , true);
+	$("#start_game").attr("disabled" , false);
+	$("#pause").attr("disabled" , true);
+	pause=1;
 	draw_snake();
 });
 
@@ -214,12 +230,24 @@ function draw_snake()
 		y:snake_head_y
 	}
 	snake.unshift(snake_new_head);
-	if(snake[0].x<0||snake[0].y<0)
+	if(snake[0].x<0||snake[0].y<0||snake[0].x>=playing_area_width/snake_width||snake[0].y>=playing_area_height/snake_height)
 	{
-		draw_ball();
+		initialize();
+		$("#start_game").attr("disabled" , false);
+		$("#pause").attr("disabled" , true);
 		return;
 	}
-	var w=setTimeout(draw_snake,100);
+	for(i=1;i<snake.length;i++)
+	{
+		if(snake[i].x==snake[0].x&&snake[i].y==snake[0].y)
+		{
+			return;
+		}
+	}
+	if(pause==0)
+	{
+		var w=setTimeout(draw_snake,100);
+	}
 }
 
 function set_direction(a)
@@ -229,8 +257,22 @@ function set_direction(a)
 
 function set_ball()
 {
-	ball_x=Math.round(Math.random()*(playing_area_width/snake_width)+1);
-	ball_y=Math.round(Math.random()*(playing_area_height/snake_height)+1);
+	while(1)
+	{
+		ball_x=Math.round(Math.random()*(playing_area_width/snake_width)+1);
+		if(ball_x<playing_area_width/snake_width)
+		{
+			break;
+		}		
+	}
+	while(1)
+	{
+		ball_y=Math.round(Math.random()*(playing_area_height/snake_height)+1);
+		if(ball_y<playing_area_height/snake_height)
+		{
+			break;
+		}
+	}
 }
 
 set_ball();
@@ -243,4 +285,21 @@ function draw_ball()
 	ctx.fillRect(x*snake_width+border,y*snake_height+border,snake_width,snake_height);
 	ctx.fillStyle="black";
 	ctx.strokeRect(x*snake_width+border,y*snake_height+border,snake_width,snake_height);
+}
+
+function initialize()
+{
+	snake=[];
+	for(i=4;i>0;i--)
+	{
+		snake.push({
+			x:i,
+			y:(playing_area_height/2)/snake_height
+		})
+	}
+	set_ball();
+	$("#your_score_score").text("0");
+	direction="right";
+	pause=0;
+	$("#top_arrow_btn,#bottom_arrow_btn,#left_arrow_btn,#right_arrow_btn").attr("disabled" , true);
 }
