@@ -22,12 +22,45 @@ var right_arrow_margin_left=2*between_arrow_margin+arrow_width;
 var right_arrow_margin_top=left_arrow_margin_top;
 var bottom_arrow_margin_left=top_arrow_margin_left;
 var bottom_arrow_margin_top=2*between_arrow_margin+arrow_height;
-var border=15;
-ctx.fillStyle="grey";
+var border=20;
+var start_game_margin_left=front_width+canvas_width/4;
+var snake_width=15;
+var snake_height=15;
+var playing_area_width=canvas_width-2*border;
+var playing_area_height=canvas_height-2*border;
+var snake=[];
+var snake_head_x;
+var snake_head_y;
+var snake_new_head;
+var direction;
+var new_direction;
+var ball_x;
+var ball_y;
+ctx.fillStyle="#8B4513";
 ctx.fillRect(0,0,canvas_width,border);
 ctx.fillRect(0,border,border,canvas_height);
 ctx.fillRect(border,canvas_height-border,canvas_width,canvas_height);
 ctx.fillRect(canvas_width-border,border,canvas_width,canvas_height-border);
+ctx.fillStyle="black";
+var i;
+for(i=border;i<canvas_width;i+=border)
+{
+	ctx.moveTo(i,0);
+	ctx.lineTo(i,border);
+	ctx.stroke();
+	ctx.moveTo(i,canvas_height-border);
+	ctx.lineTo(i,canvas_height);
+	ctx.stroke();
+}
+for(i=border;i<canvas_height;i+=border)
+{
+	ctx.moveTo(0,i);
+	ctx.lineTo(border,i);
+	ctx.stroke();
+	ctx.moveTo(canvas_width-border,i);
+	ctx.lineTo(canvas_width,i);
+	ctx.stroke();
+}
 width+="px";
 canvas_width+="px";
 canvas_height+="px";
@@ -45,6 +78,7 @@ right_arrow_margin_top+="px";
 right_arrow_margin_left+="px";
 bottom_arrow_margin_top+="px";
 bottom_arrow_margin_left+="px";
+start_game_margin_left+="px";
 $("#start").css({ "width" : width , "height" : canvas_height });
 $("#front").css({ "width" : front_width , "height" : canvas_height , "float" : "left" });
 $("#middle").css({ "width" : canvas_width , "height" : canvas_height , "float" : "left"});
@@ -70,3 +104,143 @@ $("#your_score_score").css({ "margin-top" : "15px" ,"text-align" : "center" , "f
 $("#high_score_text").css({ "margin-top" : "0px" ,"margin-bottom" : "0px" , "text-align" : "center" , "font-size" : "25px" , "color" : "white" });
 $("#high_score_score").css({ "margin-top" : "15px" ,"text-align" : "center" , "font-size" : "40px" , "color" : "white" });
 $("#blank_area").css({ "width" : front_width , "height" : your_score_height });
+$("#start_game").css({ "margin-top" : "20px", "margin-left" : start_game_margin_left });
+$(document).ready(function()
+{
+	draw_snake_block();
+	$("#top_arrow_btn,#bottom_arrow_btn,#left_arrow_btn,#right_arrow_btn").attr("disabled" , true);
+	direction="right";
+});
+
+$("#start_game").click(function()
+{
+	$("#top_arrow_btn,#bottom_arrow_btn,#left_arrow_btn,#right_arrow_btn").attr("disabled" , false);
+	$("#start_game").attr("disabled" , true);
+	draw_snake();
+});
+
+$("#top_arrow_btn,#bottom_arrow_btn,#left_arrow_btn,#right_arrow_btn").click(function()
+{
+	id=this.id;
+	new_direction=id.substring(0,id.indexOf("_"));
+	if(direction=="left"&&new_direction!="right")
+	{
+		direction=new_direction;
+	}
+	else if(direction=="right"&&new_direction!="left")
+	{
+		direction=new_direction;
+	}
+	else if(direction=="top"&&new_direction!="bottom")
+	{
+		direction=new_direction;
+	}
+	else if(direction=="bottom"&&new_direction!="top")
+	{
+		direction=new_direction;
+	}
+});
+
+for(i=4;i>0;i--)
+{
+	snake.push({
+		x:i,
+		y:(playing_area_height/2)/snake_height
+	})
+}
+
+function draw_snake_block()
+{
+	x=snake[0].x;
+	y=snake[0].y;
+	ctx.fillStyle="grey";
+	ctx.fillRect(x*snake_width+border,y*snake_height+border,snake_width,snake_height);
+	ctx.fillStyle="black";
+	ctx.strokeRect(x*snake_width+border,y*snake_height+border,snake_width,snake_height);
+	for(i=1;i<snake.length;i++)
+	{
+		x=snake[i].x;
+		y=snake[i].y;
+		ctx.fillStyle="green";
+		ctx.fillRect(x*snake_width+border,y*snake_height+border,snake_width,snake_height);
+		ctx.fillStyle="black";
+		ctx.strokeRect(x*snake_width+border,y*snake_height+border,snake_width,snake_height);
+	}
+}
+
+function draw_snake()
+{
+	ctx.clearRect(border,border,playing_area_width,playing_area_height);
+	snake_head_x=snake[0].x;
+	snake_head_y=snake[0].y;
+	draw_snake_block();
+	draw_ball();
+	if(direction=="left")
+	{
+		snake_head_x-=1;
+	}
+	else if(direction=="right")
+	{
+		snake_head_x+=1;
+	}
+	else if(direction=="top")
+	{
+		snake_head_y-=1;
+	}
+	else
+	{
+		snake_head_y+=1;
+	}
+	if(snake_head_x==ball_x&&snake_head_y==ball_y)
+	{
+		set_ball();
+		var initial_score = $("#your_score_score").html();
+		initial_score=parseInt(initial_score)+1;
+		var high_score = $("#high_score_score").html();
+		high_score=parseInt(high_score);
+		if(high_score<initial_score)
+		{
+			$("#high_score_score").text(initial_score);
+		}
+		$("#your_score_score").text(initial_score);
+	}
+	else
+	{
+		snake.pop();
+	}
+
+	snake_new_head={
+		x:snake_head_x,
+		y:snake_head_y
+	}
+	snake.unshift(snake_new_head);
+	if(snake[0].x<0||snake[0].y<0)
+	{
+		draw_ball();
+		return;
+	}
+	var w=setTimeout(draw_snake,100);
+}
+
+function set_direction(a)
+{
+	direction=a;
+}
+
+function set_ball()
+{
+	ball_x=Math.round(Math.random()*(playing_area_width/snake_width)+1);
+	ball_y=Math.round(Math.random()*(playing_area_height/snake_height)+1);
+}
+
+set_ball();
+
+function draw_ball()
+{
+	x=ball_x;
+	y=ball_y;
+	ctx.fillStyle="red";
+	ctx.fillRect(x*snake_width+border,y*snake_height+border,snake_width,snake_height);
+	ctx.fillStyle="black";
+	ctx.strokeRect(x*snake_width+border,y*snake_height+border,snake_width,snake_height);
+}
