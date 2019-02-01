@@ -248,6 +248,7 @@ $("#restart_game").click(function()
 	$("#start_game").attr("disabled" , false);
 	$("#restart_game").attr("disabled" , true);
 	initialize();
+	$("#pause").attr("disabled" , true);
 });
 
 $("#top_arrow_btn,#bottom_arrow_btn,#left_arrow_btn,#right_arrow_btn").click(function()
@@ -461,6 +462,7 @@ function initialize()
 	new_high_score_message_shown=0;
 	new_high_score_time=0;
 	display=0;
+	$("#pause").text("PAUSE");
 	$("#top_arrow_btn,#bottom_arrow_btn,#left_arrow_btn,#right_arrow_btn").attr("disabled" , true);
 	$("#radio_easy,#radio_intermediate,#radio_hard").attr("disabled" , false);
 }
