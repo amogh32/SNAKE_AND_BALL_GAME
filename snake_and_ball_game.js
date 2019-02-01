@@ -1,3 +1,8 @@
+if (localStorage.getItem("snake_and_ball_game_high_score") === null) 
+{
+  localStorage.setItem("snake_and_ball_game_high_score", "0");
+  localStorage.setItem("snake_and_ball_game_winner_name", "-");
+}
 var width=window.innerWidth;
 var canvas_width=$("#playing_area").css("width");
 var canvas_height=$("#playing_area").css("height");
@@ -25,6 +30,7 @@ var bottom_arrow_margin_top=2*between_arrow_margin+arrow_height;
 var border=20;
 var start_game_margin_left=front_width+canvas_width/8;
 var pause_left_margin=canvas_width/8;
+var restart_game_left_margin=canvas_width/8;
 var snake_width=15;
 var snake_height=15;
 var playing_area_width=canvas_width-2*border;
@@ -38,6 +44,49 @@ var new_direction;
 var ball_x;
 var ball_y;
 var pause=0;
+var game_over_message="GAME OVER!!!";
+var game_over_size=50;
+var game_over_x=border+playing_area_width/2;
+var game_over_y=border+playing_area_height/2;
+var player_name;
+while(1)
+{	
+	player_name = prompt("Enter your name").trim();
+	if(player_name==null)
+	{
+		alert("You have to enter your name");
+	}
+	else
+	{
+		if(player_name=="")
+		{
+			alert("You have to enter your name");
+		}
+		else
+		{
+			for(i=0;i<player_name.length;i++)
+			{
+				if(player_name.charAt(i)==' ')
+				{
+					continue;
+				}
+				if((player_name.charCodeAt(i)>=65&&player_name.charCodeAt(i)<=90)||(player_name.charCodeAt(i)>=97&&player_name.charCodeAt(i)<=122))
+				{
+					continue;
+				}
+				else
+				{
+					alert("Name should contain only letters");
+					break;
+				}
+			}
+			if(i==player_name.length)
+			{
+				break;
+			}
+		}
+	}
+}
 ctx.fillStyle="#8B4513";
 ctx.fillRect(0,0,canvas_width,border);
 ctx.fillRect(0,border,border,canvas_height);
@@ -82,12 +131,15 @@ bottom_arrow_margin_top+="px";
 bottom_arrow_margin_left+="px";
 start_game_margin_left+="px";
 pause_left_margin+="px";
+restart_game_left_margin+="px";
+game_over_size+="px Arial";
 $("#start").css({ "width" : width , "height" : canvas_height });
 $("#front").css({ "width" : front_width , "height" : canvas_height , "float" : "left" });
 $("#middle").css({ "width" : canvas_width , "height" : canvas_height , "float" : "left"});
 $("#last").css({ "width" : front_width , "height" : canvas_height , "float" : "left"});
 $("#your_score_display").css({ "width" : front_width , "height" : your_score_height , "background-color" : "lightgreen"});
 $("#high_score_display").css({ "width" : front_width , "height" : your_score_height , "background-color" : "powderblue"});
+$("#winner_name_display").css({ "width" : front_width , "height" : your_score_height , "background-color" : "powderblue"});
 $("#controls").css({ "width" : front_width , "height" : control_height , "background-color" : "white"});
 $("#controls_text").css({ "margin-top" : "0px" , "font-size" : "25px" , "text-align" : "center" });
 $("#top_arrow").css({ "width" : arrow_width , "height" : arrow_height , "margin-top" : top_arrow_margin_top , "margin-left" : top_arrow_margin_left });
@@ -106,14 +158,20 @@ $("#your_score_text").css({ "margin-top" : "0px" ,"margin-bottom" : "0px" , "tex
 $("#your_score_score").css({ "margin-top" : "15px" ,"text-align" : "center" , "font-size" : "40px" , "color" : "white" });
 $("#high_score_text").css({ "margin-top" : "0px" ,"margin-bottom" : "0px" , "text-align" : "center" , "font-size" : "25px" , "color" : "white" });
 $("#high_score_score").css({ "margin-top" : "15px" ,"text-align" : "center" , "font-size" : "40px" , "color" : "white" });
-$("#blank_area").css({ "width" : front_width , "height" : your_score_height });
 $("#start_game").css({ "margin-top" : "20px", "margin-left" : start_game_margin_left });
 $("#pause").css({  "margin-left" : pause_left_margin });
+$("#restart_game").css({  "margin-left" : restart_game_left_margin });
+$("#winner_name_text").css({ "margin-top" : "0px" ,"margin-bottom" : "0px" , "text-align" : "center" , "font-size" : "25px" , "color" : "white" });
+$("#winner_name_name").css({ "margin-top" : "15px" ,"text-align" : "center" , "font-size" : "40px" , "color" : "white" });
+$("#high_score_score").text(localStorage.getItem("snake_and_ball_game_high_score"));
+$("#winner_name_name").text(localStorage.getItem("snake_and_ball_game_winner_name"));
+
 $(document).ready(function()
 {
 	draw_snake_block();
 	$("#top_arrow_btn,#bottom_arrow_btn,#left_arrow_btn,#right_arrow_btn").attr("disabled" , true);
 	$("#pause").attr("disabled" , true);
+	$("#restart_game").attr("disabled" , true);
 	direction="right";
 });
 
@@ -128,11 +186,29 @@ $("#start_game").click(function()
 
 $("#pause").click(function()
 {
-	$("#top_arrow_btn,#bottom_arrow_btn,#left_arrow_btn,#right_arrow_btn").attr("disabled" , true);
+	if(pause==0)
+	{
+		$("#top_arrow_btn,#bottom_arrow_btn,#left_arrow_btn,#right_arrow_btn").attr("disabled" , true);
+		$("#restart_game").attr("disabled" , false);
+		$("#pause").text("CONTINUE");
+		pause=1;
+		draw_snake();
+	}
+	else
+	{
+		$("#top_arrow_btn,#bottom_arrow_btn,#left_arrow_btn,#right_arrow_btn").attr("disabled" , false);
+		$("#restart_game").attr("disabled" , true);
+		$("#pause").text("PAUSE");
+		pause=0;
+		draw_snake();
+	}
+});
+
+$("#restart_game").click(function()
+{
 	$("#start_game").attr("disabled" , false);
-	$("#pause").attr("disabled" , true);
-	pause=1;
-	draw_snake();
+	$("#restart_game").attr("disabled" , true);
+	initialize();
 });
 
 $("#top_arrow_btn,#bottom_arrow_btn,#left_arrow_btn,#right_arrow_btn").click(function()
@@ -216,7 +292,10 @@ function draw_snake()
 		high_score=parseInt(high_score);
 		if(high_score<initial_score)
 		{
+			localStorage.setItem("snake_and_ball_game_high_score", initial_score);
+  			localStorage.setItem("snake_and_ball_game_winner_name", player_name);
 			$("#high_score_score").text(initial_score);
+			$("#winner_name_name").text(player_name);
 		}
 		$("#your_score_score").text(initial_score);
 	}
@@ -232,15 +311,16 @@ function draw_snake()
 	snake.unshift(snake_new_head);
 	if(snake[0].x<0||snake[0].y<0||snake[0].x>=playing_area_width/snake_width||snake[0].y>=playing_area_height/snake_height)
 	{
-		initialize();
-		$("#start_game").attr("disabled" , false);
+		$("#restart_game").attr("disabled" , false);
 		$("#pause").attr("disabled" , true);
+		game_over();
 		return;
 	}
 	for(i=1;i<snake.length;i++)
 	{
 		if(snake[i].x==snake[0].x&&snake[i].y==snake[0].y)
 		{
+			game_over();
 			return;
 		}
 	}
@@ -248,6 +328,14 @@ function draw_snake()
 	{
 		var w=setTimeout(draw_snake,100);
 	}
+}
+
+function game_over()
+{
+	ctx.fillStyle="red";
+	ctx.font = game_over_size;
+	var game_over_x_final=game_over_x-ctx.measureText(game_over_message).width/2;
+	ctx.fillText(game_over_message,game_over_x_final,game_over_y);
 }
 
 function set_direction(a)
@@ -297,7 +385,9 @@ function initialize()
 			y:(playing_area_height/2)/snake_height
 		})
 	}
+	ctx.clearRect(border,border,playing_area_width,playing_area_height);
 	set_ball();
+	draw_snake_block();
 	$("#your_score_score").text("0");
 	direction="right";
 	pause=0;
