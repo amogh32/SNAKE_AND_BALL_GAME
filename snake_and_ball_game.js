@@ -3,6 +3,8 @@ if (localStorage.getItem("snake_and_ball_game_high_score") === null)
   localStorage.setItem("snake_and_ball_game_high_score", "0");
   localStorage.setItem("snake_and_ball_game_winner_name", "-");
 }
+/*localStorage.setItem("snake_and_ball_game_high_score", "0");
+localStorage.setItem("snake_and_ball_game_winner_name", "-");*/
 var width=window.innerWidth;
 var canvas_width=$("#playing_area").css("width");
 var canvas_height=$("#playing_area").css("height");
@@ -49,15 +51,28 @@ var game_over_size=50;
 var game_over_x=border+playing_area_width/2;
 var game_over_y=border+playing_area_height/2;
 var player_name;
+var new_high_score_message_shown=0;
+var new_high_score_message="NEW HIGH SCORE!!!";
+var new_high_score_size=40;
+var new_high_score_x=border+playing_area_width/2;
+var new_high_score_y=border+100;
+var new_high_score_time=0;
+var speed=100;
+var display=0;
+var blank_height=canvas_height*(1-factor)/2;
+var select_level_height=canvas_height*(1-factor)/2;
+var level_left_margin=(front_width)/4;
+
 while(1)
 {	
-	player_name = prompt("Enter your name").trim();
+	player_name = prompt("Enter your name");
 	if(player_name==null)
 	{
 		alert("You have to enter your name");
 	}
 	else
 	{
+		player_name=player_name.trim();
 		if(player_name=="")
 		{
 			alert("You have to enter your name");
@@ -133,6 +148,10 @@ start_game_margin_left+="px";
 pause_left_margin+="px";
 restart_game_left_margin+="px";
 game_over_size+="px Arial";
+new_high_score_size+="px Arial";
+blank_height+="px";
+select_level_height+="px";
+level_left_margin+="px";
 $("#start").css({ "width" : width , "height" : canvas_height });
 $("#front").css({ "width" : front_width , "height" : canvas_height , "float" : "left" });
 $("#middle").css({ "width" : canvas_width , "height" : canvas_height , "float" : "left"});
@@ -165,6 +184,25 @@ $("#winner_name_text").css({ "margin-top" : "0px" ,"margin-bottom" : "0px" , "te
 $("#winner_name_name").css({ "margin-top" : "15px" ,"text-align" : "center" , "font-size" : "40px" , "color" : "white" });
 $("#high_score_score").text(localStorage.getItem("snake_and_ball_game_high_score"));
 $("#winner_name_name").text(localStorage.getItem("snake_and_ball_game_winner_name"));
+$("#blank").css({ "width" : front_width , "height" : blank_height , "background-color" : "white"});
+$("#select_level").css({ "width" : front_width , "height" : select_level_height , "background-color" : "white"});
+$("#level_text").css({ "margin-top" : "0px" , "font-size" : "25px" , "text-align" : "center" });
+$("#easy,#intermediate,#hard").css({ "margin-left" : level_left_margin , "font-size" : "20px"  });
+
+$("#radio_easy").click(function()
+{
+	speed=100;
+});
+
+$("#radio_intermediate").click(function()
+{
+	speed=50;
+});
+
+$("#radio_hard").click(function()
+{
+	speed=25;
+});
 
 $(document).ready(function()
 {
@@ -178,6 +216,7 @@ $(document).ready(function()
 $("#start_game").click(function()
 {
 	$("#top_arrow_btn,#bottom_arrow_btn,#left_arrow_btn,#right_arrow_btn").attr("disabled" , false);
+	$("#radio_easy,#radio_intermediate,#radio_hard").attr("disabled" , true);
 	$("#pause").attr("disabled" , false);
 	$("#start_game").attr("disabled" , true);
 	pause=0;
@@ -267,6 +306,28 @@ function draw_snake()
 	snake_head_y=snake[0].y;
 	draw_snake_block();
 	draw_ball();
+	if(new_high_score_time!=0)
+	{
+		if(display==0)
+		{
+			ctx.fillStyle="yellow";
+			ctx.font = new_high_score_size;
+			var new_high_score_x_final=new_high_score_x-ctx.measureText(new_high_score_message).width/2;
+			ctx.fillText(new_high_score_message,new_high_score_x_final,new_high_score_y);	
+		}
+		new_high_score_time-=speed;
+		if(new_high_score_time%200==0)
+		{
+			if(display==0)
+			{
+				display=1;
+			}
+			else
+			{
+				display=0;
+			}
+		}
+	}
 	if(direction=="left")
 	{
 		snake_head_x-=1;
@@ -296,6 +357,11 @@ function draw_snake()
   			localStorage.setItem("snake_and_ball_game_winner_name", player_name);
 			$("#high_score_score").text(initial_score);
 			$("#winner_name_name").text(player_name);
+			if(new_high_score_message_shown==0)
+			{
+				new_high_score_message_shown=1;
+				new_high_score_time=3000;
+			}
 		}
 		$("#your_score_score").text(initial_score);
 	}
@@ -326,7 +392,7 @@ function draw_snake()
 	}
 	if(pause==0)
 	{
-		var w=setTimeout(draw_snake,100);
+		var w=setTimeout(draw_snake,speed);
 	}
 }
 
@@ -336,6 +402,7 @@ function game_over()
 	ctx.font = game_over_size;
 	var game_over_x_final=game_over_x-ctx.measureText(game_over_message).width/2;
 	ctx.fillText(game_over_message,game_over_x_final,game_over_y);
+	$("#top_arrow_btn,#bottom_arrow_btn,#left_arrow_btn,#right_arrow_btn").attr("disabled" , true);
 }
 
 function set_direction(a)
@@ -391,5 +458,9 @@ function initialize()
 	$("#your_score_score").text("0");
 	direction="right";
 	pause=0;
+	new_high_score_message_shown=0;
+	new_high_score_time=0;
+	display=0;
 	$("#top_arrow_btn,#bottom_arrow_btn,#left_arrow_btn,#right_arrow_btn").attr("disabled" , true);
+	$("#radio_easy,#radio_intermediate,#radio_hard").attr("disabled" , false);
 }
