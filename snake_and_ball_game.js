@@ -438,9 +438,12 @@ function draw_ball()
 	x=ball_x;
 	y=ball_y;
 	ctx.fillStyle="red";
-	ctx.fillRect(x*snake_width+border,y*snake_height+border,snake_width,snake_height);
+	/*ctx.fillRect(x*snake_width+border,y*snake_height+border,snake_width,snake_height);
 	ctx.fillStyle="black";
-	ctx.strokeRect(x*snake_width+border,y*snake_height+border,snake_width,snake_height);
+	ctx.strokeRect(x*snake_width+border,y*snake_height+border,snake_width,snake_height);*/
+	ctx.beginPath();
+	ctx.arc(x*snake_width+border+snake_width/2, y*snake_height+border+snake_height/2, snake_width/2, 0, 2 * Math.PI);
+	ctx.fill();
 }
 
 function initialize()
